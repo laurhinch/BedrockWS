@@ -1,1 +1,1 @@
-A JavaScript API for Minecraft Bedrock web-socket connections.
+A JavaScript example for Minecraft Bedrock web-socket connections.
