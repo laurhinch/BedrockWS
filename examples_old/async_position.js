@@ -38,6 +38,7 @@ wss.on('connection', socket => {
     if (msg.header.messagePurpose == 'commandResponse') {
       //if command is awaited, handle it
       if (msg.header.requestId in awaitedQueue) {
+        //if received
         if (msg.body.statusCode < 0) {
           console.log(awaitedQueue[msg.header.requestId].body.commandLine, msg.body.statusMessage);
         }
@@ -90,9 +91,6 @@ wss.on('connection', socket => {
     let cmd_uuid = uuid.v4()
     let commandRequestPacket = commandRequest(command, cmd_uuid);
     socket.send(commandRequestPacket);
-    result = socket.on('message', packet => {
-      if(packet. )
-    });
     return result;
   }
 
