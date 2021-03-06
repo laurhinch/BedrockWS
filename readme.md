@@ -7,7 +7,7 @@ Currently the API is limited and does not yet contain JSON definitions for all p
 ## Examples ##
 Websocket server examples can be found in the `examples` folder. Outdated examples are located in the `examples_old` folder and may be broken or incomplete.
 
-### basicconect.js ###
+### basicconnect.js ###
 This code can be found in `examples/basicconnect.js`. It runs a basic websocket server that can be connected to with `/connect localhost:3000`.
 
 ```javascript
