@@ -1,6 +1,5 @@
 import WebSocket from '../node_modules/ws/index.js';
-import uuid, { NIL } from '../node_modules/uuid/dist/index.js';
-import { get } from 'http';
+import uuid from '../node_modules/uuid/dist/index.js';
 
 class Server {
     constructor(host, port) {
