@@ -6,8 +6,8 @@ class Server {
         this.host = host;
         this.port = port;
         this.commandQueue = [];
-        this.commandResponses = {};
         this.awaitingCommands = {};
+        this.waitingResponses = {};
         this.startWSServer();
     }
 
@@ -23,7 +23,7 @@ class Server {
     }
 
     //runs the server
-    async run() {
+    run() {
         //on websocket connection
         this._server.on('connection', socket => {
             //run the on connect callback
@@ -31,19 +31,17 @@ class Server {
             //on receiving an incoming packet
             socket.on('message', packet => {
                 let packetData = JSON.parse(packet);
+                //if this packet is a commandResponse
+                if (packetData.header.messagePurpose === 'commandResponse') {
+                    //add it to the waitingResponses
+                    if(this.waitingResponses[packetData.header.requestId]) {
+                        //basically calling resolve(packetData)
+                        this.waitingResponses[packetData.header.requestId][0](packetData);
+                    }
+                }
                 //return packet to on event callback function
                 if(packetData.header.messagePurpose === 'event') {
                     this.eventCallback(packetData);
-                }
-                //if this packet is a commandResponse
-                if (packetData.header.messagePurpose === 'commandResponse') {
-                    //if command is awaited, add it to the commandResponses
-                    this.commandResponses[packetData.header.requestId] = packetData;
-                    //console.log(JSON.stringify(this.commandResponses));
-                    //console.log(this.commandResponses[packetData.header.requestId]);
-                    Object.keys(this.commandResponses).forEach(element => {
-                        console.log("\tResponse: " + JSON.stringify(element));
-                    });
                 }
                 //send commands from the command queue
                 this.sendCommandsFromQueue(socket);
@@ -51,7 +49,7 @@ class Server {
         });
     }
 
-    sendCommandsFromQueue(socket) {
+    async sendCommandsFromQueue(socket) {
         //send new commands from the commandQueue (limit is 100 max)
         let c = Math.min(100 - Object.keys(this.awaitingCommands).length, this.commandQueue.length);
         for (let i = 0; i < c; i++) {
@@ -92,29 +90,22 @@ class Server {
         return data;
     }
 
-    //returns the commandResponse packet for the given requestId
-    getCommandResponse(cmdRequestId) {
-        return new Promise(resolve => {
-            Object.keys(this.commandResponses).forEach(element => {
-                if(element.header.requestId === cmdRequestId) {
-                    let result = element;
-                    delete this.awaitingCommands[cmdRequestId];
-                    delete this.commandResponses[cmdRequestId];
-                    resolve(result);
-                }
-            });
-        });
+    async getPosition(target) {
+        let result = await this.executeCommand(`querytarget ${target}`);
+        return JSON.parse(result.body.details)[0].position;
     }
 
-    //adds the command to the command queue and returns commandResponse when command response is received
-    async executeCommand(command) {
-        //generate commandRequest
-        let commandUUID = this.newUUID();
-        //add commandRequest to command send queue
-        this.commandQueue.push(this.commandRequestJson(command, commandUUID));
-        //return commandResponse packet for sent commandRequest
-        this.getCommandResponse(commandUUID).then(result => {
-            return result;
+    async getRotation(target) {
+        let result = await this.executeCommand(`querytarget ${target}`);
+        return JSON.parse(result.body.details)[0].yRot;
+    }
+
+    async executeCommand(command){
+        let commandId = this.newUUID();
+        let commandData = this.commandRequestJson(command, commandId);
+        this.commandQueue.push(commandData);
+        return new Promise((resolve, reject) => {
+            this.waitingResponses[commandId] = [resolve, reject];
         });
     }
 }

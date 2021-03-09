@@ -21,19 +21,14 @@ wss.onConnect(socket => {
 });
 
 //on event
-wss.onEvent(event => {
-    /*
-    if(event.body.eventName === 'PlayerMessage') {
-        console.log("got message \"" + event.body.properties.Message + "\"");
-        wss.executeCommand(`querytarget laurhinch`).then(response => {
-            console.log(response);
-        });
-    }
-    */
+wss.onEvent(async event => {
     if(event.body.properties.Message === '!') {
-        wss.executeCommand(`say .`).then(response => {
-            console.log(response);
-        });
+        let pos = await wss.getPosition('Steve');
+        console.log(pos);
+    }
+    if(event.body.properties.Message === '?') {
+        let rot = await wss.getRotation('Steve');
+        console.log(rot);
     }
 });
 
