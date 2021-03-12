@@ -8,7 +8,6 @@ class Server {
         this.commandQueue = [];
         this.awaitingCommands = {};
         this.waitingResponses = {};
-        this.startWSServer();
     }
 
     //returns a new uuid
@@ -16,8 +15,22 @@ class Server {
         return uuid.v4();
     }
 
+    //closes all sockets
+    disconnectAll() {
+        this._server.clients.forEach((socket) => {
+            //attempt to perform a soft close on this socket
+            socket.close();
+            process.nextTick(() => {
+                //perform hard close if socket hangs
+                if ([socket.OPEN, socket.CLOSING].includes(socket.readyState)) {
+                    socket.terminate();
+                }
+            });
+        });
+    }
+
     //starts the websocket server
-    startWSServer() {
+    start() {
         console.log(`Type /connect ${this.host}:${this.port}`);
         this._server = new WebSocket.Server({ port: this.port, host: this.host });
     }
@@ -34,13 +47,13 @@ class Server {
                 //if this packet is a commandResponse
                 if (packetData.header.messagePurpose === 'commandResponse') {
                     //add it to the waitingResponses
-                    if(this.waitingResponses[packetData.header.requestId]) {
+                    if (this.waitingResponses[packetData.header.requestId]) {
                         //basically calling resolve(packetData)
                         this.waitingResponses[packetData.header.requestId][0](packetData);
                     }
                 }
                 //return packet to on event callback function
-                if(packetData.header.messagePurpose === 'event') {
+                if (packetData.header.messagePurpose === 'event') {
                     this.eventCallback(packetData);
                 }
                 //send commands from the command queue
@@ -90,6 +103,11 @@ class Server {
         return data;
     }
 
+    async getLocalPlayerName() {
+        let result = await this.executeCommand('getlocalplayername');
+        return result.body.localplayername;
+    }
+
     async getPosition(target) {
         let result = await this.executeCommand(`querytarget ${target}`);
         return JSON.parse(result.body.details)[0].position;
@@ -100,7 +118,7 @@ class Server {
         return JSON.parse(result.body.details)[0].yRot;
     }
 
-    async executeCommand(command){
+    async executeCommand(command) {
         let commandId = this.newUUID();
         let commandData = this.commandRequestJson(command, commandId);
         this.commandQueue.push(commandData);

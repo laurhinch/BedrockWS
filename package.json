@@ -1,9 +1,28 @@
 {
-    "name": "bedrockws",
-    "version": "0.0.1",
-    "type": "module",
-    "dependencies": {
-        "uuid": "^8.3.2",
-        "ws": "^7.4.3"
-    }
+  "name": "bedrockws",
+  "version": "0.0.1",
+  "type": "module",
+  "dependencies": {
+    "uuid": "^8.3.2",
+    "ws": "^7.4.3"
+  },
+  "description": "BedrockWS is a very simple API for Minecraft Bedrock websocket connections. The complexity of the API may increase in the future.",
+  "main": "commandtest.js",
+  "directories": {
+    "example": "examples"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/laurhinch/bedrockws.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/laurhinch/bedrockws/issues"
+  },
+  "homepage": "https://github.com/laurhinch/bedrockws#readme"
 }

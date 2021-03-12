@@ -3,6 +3,8 @@ import Server from "../bedrockws/server.js";
 //start a new websocket server on localhost:3000
 const wss = new Server('localhost', 3000);
 
+wss.start();
+
 //on connection
 wss.onConnect(socket => {
     console.log("Player connected.");
@@ -25,6 +27,10 @@ wss.onEvent(async event => {
     if(event.body.properties.Message === '!') {
         let pos = await wss.getPosition('Steve');
         console.log(pos);
+    }
+    if(event.body.properties.Message === '.') {
+        let name = await wss.getLocalPlayerName();
+        console.log(name);
     }
     if(event.body.properties.Message === '?') {
         let rot = await wss.getRotation('Steve');
