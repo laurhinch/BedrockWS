@@ -25,7 +25,7 @@ wss.onConnect(socket => {
 //on event
 wss.onEvent(async event => {
     if(event.body.properties.Message === '!') {
-        let pos = await wss.getPosition('Steve');
+        let pos = await wss.getPosition(event.body.properties.Sender);
         console.log(pos);
     }
     if(event.body.properties.Message === '.') {
@@ -33,7 +33,7 @@ wss.onEvent(async event => {
         console.log(name);
     }
     if(event.body.properties.Message === '?') {
-        let rot = await wss.getRotation('Steve');
+        let rot = await wss.getRotation(event.body.properties.Sender);
         console.log(rot);
     }
 });
